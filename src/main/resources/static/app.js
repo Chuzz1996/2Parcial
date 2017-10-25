@@ -94,7 +94,7 @@ var app = (function () {
                 function(){
                     alert("FALLO");
                 },function(){
-                    stompClient.send('/app/wupdate.'+gameid,{}, JSON.stringify({"id":id,"name":nombreJugador ,"photoUrl":photo}));
+                    stompClient.send('/app/wupdate.'+gameid,{}, JSON.stringify({"username":nombreJugador ,"word":$("#adivina").val()}));
                 }
             );
 
