@@ -20,7 +20,9 @@ var app = (function () {
                     dibujar(eventbody.body);
                 });
                 stompClient.subscribe('/topic/winner.'+gameid,function(eventbody){
-                    console.info("LLEGO A GANAR");
+                    var theObject=JSON.parse(message.body);
+                    document.getElementById("estado").innerHTML = "finalizado";
+                    document.getElementById("ganador").innerHTML = theObject.username;
                 });
             
             });

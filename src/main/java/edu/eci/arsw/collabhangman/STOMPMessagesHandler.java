@@ -31,10 +31,8 @@ public class STOMPMessagesHandler {
 	@MessageMapping("/wupdate.{gameid}")    
 	public void handlePointEvent(HangmanWordAttempt hwa,@DestinationVariable Integer gameid) throws Exception {
             boolean win=gameServices.guessWord(hwa.getUsername(),gameid, hwa.getWord());
-            System.out.println("NO");
             if(win){
-                System.out.println("PASO");
-                msgt.convertAndSend("/winner."+gameid,hwa);
+                msgt.convertAndSend("/topic/winner."+gameid,hwa);
             }
 	}
 }
