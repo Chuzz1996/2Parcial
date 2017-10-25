@@ -20,7 +20,7 @@ var app = (function () {
                     dibujar(eventbody.body);
                 });
                 stompClient.subscribe('/topic/winner.'+gameid,function(eventbody){
-                    var theObject=JSON.parse(message.body);
+                    var theObject=JSON.parse(eventbody.body);
                     document.getElementById("estado").innerHTML = "finalizado";
                     document.getElementById("ganador").innerHTML = theObject.username;
                 });
