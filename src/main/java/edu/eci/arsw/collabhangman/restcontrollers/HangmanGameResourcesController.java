@@ -64,18 +64,17 @@ public class HangmanGameResourcesController {
     @RequestMapping(path = "/{gameid}/letterattempts", method = RequestMethod.POST)
     public ResponseEntity<?> tryLetterInGame(@PathVariable Integer gameid, @RequestBody HangmanLetterAttempt hga){
         try {
-
             String tmp =gameServices.addLetterToGame(gameid, hga.getLetter());
-            
             LOG.log(Level.INFO, "Getting letter from client {0}:{1}", new Object[]{hga.getUsername(), hga.getLetter()});
-
-
             return new ResponseEntity<>(HttpStatus.CREATED);
         } catch (GameServicesException ex) {
             Logger.getLogger(HangmanGameResourcesController.class.getName()).log(Level.SEVERE, null, ex);
             return new ResponseEntity<>("No existe el juego",HttpStatus.FORBIDDEN); 
         }
     }
+    
+    
+    
     private static final Logger LOG = Logger.getLogger(HangmanGameResourcesController.class.getName());
     
     @RequestMapping(path = "/{gameid}/wordattempts", method = RequestMethod.POST)
@@ -83,7 +82,7 @@ public class HangmanGameResourcesController {
         try {
 
             boolean win=gameServices.guessWord(hwa.getUsername(),gameid, hwa.getWord());
-            
+            System.out.println(win);
             LOG.log(Level.INFO, "Getting word from client {0}:{1}", new Object[]{hwa.getUsername(), hwa.getWord()});
             
             

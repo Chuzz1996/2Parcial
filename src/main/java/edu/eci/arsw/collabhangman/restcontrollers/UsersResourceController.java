@@ -5,6 +5,8 @@
  */
 package edu.eci.arsw.collabhangman.restcontrollers;
 
+import edu.eci.arsw.collabhangman.persistence.PersistenceException;
+import edu.eci.arsw.collabhangman.persistence.UsersRepository;
 import edu.eci.arsw.collabhangman.services.GameServices;
 import edu.eci.arsw.collabhangman.services.GameServicesException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +25,34 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/users")
 public class UsersResourceController {
   
+    
+    @Autowired
+    UsersRepository Users;
+
+    @RequestMapping(method = RequestMethod.GET)
+    public ResponseEntity<?> getAllUsers(){
+        return new ResponseEntity<>(Users.getAllUsers(),HttpStatus.ACCEPTED);
+    }
+    
+    @RequestMapping(path = "/{userid}", method = RequestMethod.GET)
+    public ResponseEntity<?> getUser(@PathVariable Integer userid){
+        try{
+            return new ResponseEntity<>(Users.getUserByID(userid),HttpStatus.ACCEPTED);
+        }catch(PersistenceException ex){
+            return new ResponseEntity<>(ex.getLocalizedMessage(),HttpStatus.NOT_FOUND);
+        }
+    }
+    
+    
+    public UsersRepository getUsers() {
+        return Users;
+    }
+
+    public void setUsers(UsersRepository Users) {
+        this.Users = Users;
+    }
+    
+    
     
     
     

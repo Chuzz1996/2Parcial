@@ -1,19 +1,45 @@
 var app = (function () {
 
+    var jugador;
     var nombreJugador="NN";
     
     var stompClient = null;
     var gameid = 0;
+    var photo;
+    
+    var dibujar = function(data){
+        $("#palabra").html("<h1>" + data + "</h1>");
+    }
+    
+    var wsconnect = function () {
+
+            var socket = new SockJS('/stompendpoint');
+            stompClient = Stomp.over(socket);
+            stompClient.connect({}, function (frame) {
+                stompClient.subscribe('/topic/wupdate.'+gameid,function(eventbody){
+                    dibujar(eventbody.body);
+                });
+                stompClient.subscribe('/topic/winner.'+gameid,function(eventbody){
+                    console.info("LLEGO A GANAR");
+                });
+            
+            });
+
+        };
+
+    var palabra = function(data){
+           $("#palabra").html("<h1>" + data + "</h1>");
+    }
 
     return {
 
         loadWord: function () {
-
-            gameid = $("#gameid").val();
             
+            gameid = $("#gameid").val();
             $.get("/hangmangames/" + gameid +"/currentword",
                     function (data) {
                         $("#palabra").html("<h1>" + data + "</h1>");
+                        wsconnect();
                     }
             ).fail(
                     function (data) {
@@ -23,63 +49,66 @@ var app = (function () {
             );
 
 
-        }
-        ,
-        wsconnect: function () {
-
-            var socket = new SockJS('/stompendpoint');
-            stompClient = Stomp.over(socket);
-            stompClient.connect({}, function (frame) {
-
-                console.log('Connected: ' + frame);
-
-                //subscriptions
-            
-            });
-
         },
 
         sendLetter: function () {
 
             var id = gameid;
 
-            var hangmanLetterAttempt = {letter: $("#caracter").val(), username: "?????"};
+            var hangmanLetterAttempt = {letter: $("#caracter").val(), username: nombreJugador};
 
-            console.info("Gameid:"+gameid+",Sending v2:"+JSON.stringify(hangmanLetterAttempt));
-
-
-            jQuery.ajax({
+            var send = $.ajax({
                 url: "/hangmangames/" + id + "/letterattempts",
                 type: "POST",
                 data: JSON.stringify(hangmanLetterAttempt),
-                dataType: "json",
-                contentType: "application/json; charset=utf-8",
-                success: function () {
-                    //
-                }
-            });
-
+                contentType: "application/json"
+            })
+            
+            send.then(
+                    function(){
+                        $.get("/hangmangames/" + gameid +"/currentword",function(data){
+                            stompClient.send('/topic/wupdate.'+gameid,{}, data);
+                        });
+                        
+                    },function(){
+                        alert("NO LLEGO");
+                    }
+            );
 
         },
 
         sendWord: function () {
             
-            var hangmanWordAttempt = {word: $("#adivina").val(), username: "??????"};
+            var hangmanWordAttempt = {word: $("#adivina").val(), username: nombreJugador};
             
             var id = gameid;
 
+           
             jQuery.ajax({
                 url: "/hangmangames/" + id + "/wordattempts",
                 type: "POST",
                 data: JSON.stringify(hangmanWordAttempt),
                 dataType: "json",
-                contentType: "application/json; charset=utf-8",
-                success: function () {
-                    //
+                contentType: "application/json; charset=utf-8"
+            }).then(
+                function(){
+                    alert("FALLO");
+                },function(){
+                    stompClient.send('/app/wupdate.'+gameid,{}, JSON.stringify({"id":id,"name":nombreJugador ,"photoUrl":photo}));
                 }
-            });
+            );
 
             
+        },
+        
+        addUser: function(){
+            $.get("/users/"+document.getElementById("playerid").value+"/",function(val){
+                jugador = val;
+                nombreJugador = jugador.name;
+                photo = jugador.photoUrl;
+                document.getElementById("nombreJugador").innerHTML = nombreJugador;
+                document.getElementById("ImagenUsuario").src = jugador.photoUrl;
+            });
         }
 
     };
